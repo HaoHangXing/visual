@@ -26,7 +26,7 @@ def DcGetMainFun():
     #    log.LogHandler(log_file)
 
 
-    log.LogHandler('456.log')
+    log.LogHandler('test.log')
     while True:
         pass
 

@@ -1,5 +1,5 @@
 import tool 
-
+import openpyxl
 
 
 # 配置输出的日志格式
@@ -18,6 +18,13 @@ class DataInfo(object):
     test_index = 0
     test_cout = 0
 
+    
+# 写log操作
+class WLog(object):
+    '''
+    private
+    '''
+    # 数据格式
     title_offset = 19 # 开头格式对齐
     s_run_time = '[time]'
     s_dc_vol = '[dc vol]'
@@ -30,19 +37,6 @@ class DataInfo(object):
     s_board_tem = '[board_temperature]'
     s_current = '[current]'
 
-class WLog(DataInfo):
-    '''
-    public
-    '''
-    def __init__(self, w_file):
-        self.w_f = w_file
-    
-    def __del__(self):
-        pass
-
-    def write_self_log(self):
-        pass
-    
     def Writelist(self, i_list, split_char):
         for i, vol in enumerate(i_list):
             self.w_f.write(vol)
@@ -50,57 +44,69 @@ class WLog(DataInfo):
                 self.w_f.write(split_char)
         else:
             self.w_f.write('\n')
+    '''
+    public
+    '''
+    def __init__(self, w_file):
+        self.w_f = w_file
+        
 
+    def __del__(self):
+        pass
+
+    def InputWData(self,c_data):
+        self.data = c_data
+    
     def WriteOutLog(self):
         # time
         str = f'%-{self.title_offset}s :%2d:%02d:%02d - %2d:%02d:%02d\n' % (
-            self.s_run_time, self.s_time_dict['hour'], self.s_time_dict['min'], self.s_time_dict['sec']
-            , self.e_time_dict['hour'], self.e_time_dict['min'], self.e_time_dict['sec'])
+            self.s_run_time, self.data.s_time_dict['hour'], self.data.s_time_dict['min'], self.data.s_time_dict['sec']
+            , self.data.e_time_dict['hour'], self.data.e_time_dict['min'], self.data.e_time_dict['sec'])
         self.w_f.write(str)
 
         # channel 
-        str = f'%-{self.title_offset}s : %d\n' % (self.s_test_ch, self.ch)
+        str = f'%-{self.title_offset}s : %d\n' % (self.s_test_ch, self.data.ch)
         self.w_f.write(str)
 
         # index 
-        str = f'%-{self.title_offset}s : %d\n' % (self.s_test_index, self.test_index)
+        str = f'%-{self.title_offset}s : %d\n' % (self.s_test_index, self.data.test_index)
         self.w_f.write(str)
 
 
         # start and end vol
-        str = f'%-{self.title_offset}s : %.3f - %.3f  %.3f\n' % (self.s_dc_vol, self.dc_start_vol, self.dc_end_vol, self.e_vol)
+        str = f'%-{self.title_offset}s : %.3f - %.3f  %.3f\n' % (self.s_dc_vol, self.data.dc_start_vol, self.data.dc_end_vol, self.data.e_vol)
         self.w_f.write(str)
 
         # cell vol
         str = f'%-{self.title_offset}s : '% (self.s_cell_vol)
         self.w_f.write(str)
-        self.Writelist(self.cell_vol_list, '  ')
+        self.Writelist(self.data.cell_vol_list, '  ')
 
         # test vol
         str = f'%-{self.title_offset}s : '% (self.s_test_vol)
         self.w_f.write(str)
-        self.Writelist(self.test_vol_list, '  ')
+        self.Writelist(self.data.test_vol_list, '  ')
 
         # radiator temperature
         str = f'%-{self.title_offset}s : '% (self.s_rad_tem)
         self.w_f.write(str)
-        self.Writelist(self.rad_temperature_list, ' ')
+        self.Writelist(self.data.rad_temperature_list, ' ')
 
         # board temperature
         str = f'%-{self.title_offset}s : '% (self.s_board_tem)
         self.w_f.write(str)
-        self.Writelist(self.board_temperature_list, ' ')
+        self.Writelist(self.data.board_temperature_list, ' ')
 
         # current
         str = f'%-{self.title_offset}s : '% (self.s_current)
         self.w_f.write(str)
-        self.Writelist(self.test_current_list, '  ')
+        self.Writelist(self.data.test_current_list, '  ')
 
         self.w_f.write('\n')
 
 # 读取的日志格式
 class LogInfo(object):
-    time_format = r'(\[\d+:\d+:\d+\])' # [02:23:45]
+    time_format = r'(\[\d+:\d+:\d+\])' # 例：[02:23:45]
     time_format_list = ('hour','min','sec') # 与time_format要对应
 
     s_begin_vol   = '[SUCCESS vol]'
@@ -119,6 +125,7 @@ class LogInfo(object):
 
 # 控制日志信息的读写，主要是读，写操作单独一个类
 class WRFile(LogInfo):
+    __OneFinishFlag = False
     '''
     public
     '''
@@ -130,9 +137,12 @@ class WRFile(LogInfo):
         self.r_f = open(self.r_file, 'r', encoding='utf-8')
 
     def SetWriteFile(self, file):
-        self.w_file = file
-        print("set write to  :"+ self.w_file)
-        self.w_f = open(self.w_file, 'w+')
+        print("set write to  :"+ file)
+
+        # 创建要输出的文件
+        self.w_f = open(file, 'w+')
+        self.w_log = WLog(self.w_f)
+        
 
     def WREnd(self):
         self.r_f.close()
@@ -143,7 +153,11 @@ class WRFile(LogInfo):
         for line in self.r_f.readlines():
             for info in self.get_list:
                 if info in line:
-                    self.ExtarcOneLine(info, line)
+                    self.ExtarcOneLine(info, line) # 逐行提取数据
+                    if self.__OneFinishFlag == True: # 采集一次有效数据,写一次数据
+                        self.__OneFinishFlag = False
+                        self.w_log.InputWData(self.data)
+                        self.w_log.WriteOutLog()
     '''
     private
     '''
@@ -154,50 +168,49 @@ class WRFile(LogInfo):
 
         if self.s_begin_vol == info:
             # 重新初始化一个写类
-            self.w_log = WLog(self.w_f)
+            # self.data = WLog(self.w_f)
+            self.data = DataInfo()
 
             time_list = tool.FindTime(line, self.time_format)
-            self.w_log.s_time_dict = dict(zip(self.time_format_list, time_list))
-            self.w_log.dc_start_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
+            self.data.s_time_dict = dict(zip(self.time_format_list, time_list))
+            self.data.dc_start_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
 
         elif self.s_test_volt == info:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
-            self.w_log.ch = int(data_list[0])
-            self.w_log.test_index = int(data_list[1])
-            self.w_log.test_cout = int(data_list[2])
-            if not self.w_log.test_cout == self.expect_test_cout:
+            self.data.ch = int(data_list[0])
+            self.data.test_index = int(data_list[1])
+            self.data.test_cout = int(data_list[2])
+            if not self.data.test_cout == self.expect_test_cout:
                 return False
-            self.w_log.cell_vol_list = data_list[3:3+200+1]
-            self.w_log.test_vol_list = data_list[3+200+1:-1]
-            self.w_log.dc_end_vol = float(data_list[3+200])
+            self.data.cell_vol_list = data_list[3:3+200+1]
+            self.data.test_vol_list = data_list[3+200+1:-1]
+            self.data.dc_end_vol = float(data_list[3+200])
 
-        elif self.s_rad_temperature == info and self.w_log.test_cout == self.expect_test_cout:
+        elif self.s_rad_temperature == info and self.data.test_cout == self.expect_test_cout:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
-            self.w_log.rad_temperature_list = data_list[3:-1]
+            self.data.rad_temperature_list = data_list[3:-1]
 
-        elif self.s_board_temperature == info and self.w_log.test_cout == self.expect_test_cout:
+        elif self.s_board_temperature == info and self.data.test_cout == self.expect_test_cout:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
-            self.w_log.board_temperature_list = data_list[3:-1]
+            self.data.board_temperature_list = data_list[3:-1]
 
-        elif self.s_current == info and self.w_log.test_cout == self.expect_test_cout:
+        elif self.s_current == info and self.data.test_cout == self.expect_test_cout:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
-            self.w_log.test_current_list = data_list[3:-1]
+            self.data.test_current_list = data_list[3:-1]
 
-        elif self.s_end_vol == info and self.w_log.test_cout == self.expect_test_cout:
+        elif self.s_end_vol == info and self.data.test_cout == self.expect_test_cout:
             time_list = tool.FindTime(line, self.time_format)
-            self.w_log.e_time_dict = dict(zip(self.time_format_list, time_list))
-            self.w_log.e_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
+            self.data.e_time_dict = dict(zip(self.time_format_list, time_list))
+            self.data.e_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
 
             # 若果测试没有出现异常,应该有expect_test_cout次.
-            if self.w_log.test_cout == self.expect_test_cout:
-                self.w_log.WriteOutLog()
-            
-            # del self.w_log
-            
+            if self.data.test_cout == self.expect_test_cout:
+                self.__OneFinishFlag = True
+                        
 
 # 全局控制文件
 class Log(WRFile):
@@ -215,7 +228,6 @@ class Log(WRFile):
 
     # public
     
-
 
     
 def LogHandler(file):
