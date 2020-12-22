@@ -3,7 +3,14 @@ import shutil
 import re
 
 
-       
+ # 判断文件是否文件
+def IsFile(file):
+    if os.path.isfile(file):
+        print("found %s" % file)
+        return True
+    else:
+        print("cannot find %s or not a file" % file)
+        return False      
 
 # 判断文件是否存在
 def IsExist(file):

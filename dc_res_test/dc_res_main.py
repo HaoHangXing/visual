@@ -2,9 +2,7 @@
 
 #filename : dc_res_test.py
 
-import time
 import threading
-import os
 import log
 
 class DcGetThread(threading.Thread):
@@ -21,14 +19,15 @@ class DcGetThread(threading.Thread):
 
 def DcGetMainFun():
 
-    #while True:
-    #    log_file = input('请输入要处理的log：')
-    #    log.LogHandler(log_file)
-
-
-    log.LogHandler('456.log')
     while True:
-        pass
+        log_file = input('请输入要处理的log：')
+        log.LogHandler(log_file)
+        
+
+
+    #log.LogHandler('456.log')
+    #while True:
+    #    pass
 
 if __name__ == '__main__':
     print('hello')
