@@ -1,5 +1,5 @@
 import tool 
-import openpyxl
+import excel
 
 
 # 配置输出的日志格式
@@ -142,12 +142,16 @@ class WRFile(LogInfo):
         # 创建要输出的文件
         self.w_f = open(file, 'w+')
         self.w_log = WLog(self.w_f)
-        
+
+        # excel
+        self.exl = excel.ELog(f'{file}.xlsx')
 
     def WREnd(self):
         self.r_f.close()
         self.w_f.close()
 
+        # excel
+        self.exl.close()
     
     def ExtarctLogData(self):
         for line in self.r_f.readlines():
@@ -158,6 +162,10 @@ class WRFile(LogInfo):
                         self.__OneFinishFlag = False
                         self.w_log.InputWData(self.data)
                         self.w_log.WriteOutLog()
+                        
+                        # excel
+                        self.exl.InputWData(self.data)
+                        self.exl.WriteOutLog()
     '''
     private
     '''
