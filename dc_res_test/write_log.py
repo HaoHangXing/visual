@@ -45,7 +45,7 @@ class WLog(object):
     
     def WriteOutLog(self):
         # time
-        str = f'%-{self.title_offset}s :%2d:%02d:%02d - %2d:%02d:%02d\n' % (
+        str = f'%-{self.title_offset}s : %2d:%02d:%02d - %2d:%02d:%02d\n' % (
             self.s_run_time, self.data.s_time_dict['hour'], self.data.s_time_dict['min'], self.data.s_time_dict['sec']
             , self.data.e_time_dict['hour'], self.data.e_time_dict['min'], self.data.e_time_dict['sec'])
         self.w_f.write(str)

@@ -49,15 +49,19 @@ class WRFile():
 class Log(WRFile):
     # private
     log_file = ''     # input log file 
-    output_dir = 'output' # output path
+    output_dir = '' # output path
     
     # public
     def __init__(self, file):
-        self.log_file = file
         WRFile.__init__(self,file)
         
-        tool.RemoveCreatFolder(self.output_dir)
-        self.SetWriteFile(f'{self.output_dir}/out_{file}')
+        self.log_file = tool.GetFileName(file)
+        self.output_dir = tool.GetFileDir(file)
+        self.output_dir = self.output_dir + '\output'
+
+        # tool.RemoveCreatFolder(self.output_dir)
+        tool.CreatFolder(self.output_dir)
+        self.SetWriteFile(f'{self.output_dir}\out_{self.log_file}')
 
     
 def LogHandler(file):

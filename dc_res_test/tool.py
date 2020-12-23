@@ -22,6 +22,15 @@ def IsExist(file):
         print("cannot find %s" % file)
         return False
 
+def GetFileDir(file):
+    return os.path.dirname(os.path.abspath(file))
+
+
+def CreatFolder(dir):
+    if not IsExist(dir):
+        print('Creat folder : ' + dir)
+        os.mkdir(dir)
+
 # 删除原有的文件夹，包括里面的内容。重新创建一个dir。
 def RemoveCreatFolder(dir):
     if IsExist(dir):
@@ -50,3 +59,7 @@ def GetNumformStr(str):
 def FindTime(str, pattern):
     time = FindPatternStr(str, pattern)
     return GetNumformStr(time[0])
+
+def GetFileName(file):
+    list = os.path.split(file)
+    return list[1]

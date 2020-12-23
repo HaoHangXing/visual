@@ -20,8 +20,12 @@ class DataInfo(object):
 
 # 读取的日志格式
 class LogInfo(object):
-    time_format = r'(\[\d+:\d+:\d+\])' # 例：[02:23:45]
-    time_format_list = ('hour','min','sec') # 与time_format要对应
+    #time_format = r'(\[\d+:\d+:\d+\])' # 例：[02:23:45]
+    #time_format_list = ('hour','min','sec') # 与time_format要对应
+
+    time_format = r'(\[\d+\/\d+\/\d+ \d+:\d+:\d+\])' # 例：[02:23:45] [2020/12/22 20:25:36]
+    time_format_list = ('year', 'month', 'day', 'hour','min','sec') # 与time_format要对应
+
 
     s_begin_vol   = '[SUCCESS vol]'
     s_test_volt   = '[Volt]'
@@ -36,6 +40,8 @@ class LogInfo(object):
 
 
 class RLog(LogInfo):
+    __OneFinishFlag = False
+
     def __init__(self, file):
         self.r_f = open(file, 'r', encoding='utf-8')
 
@@ -57,6 +63,7 @@ class RLog(LogInfo):
 
     def GetData(self):
         if self.__OneFinishFlag:
+            self.__OneFinishFlag = False
             return self.data
         else:
             return False
