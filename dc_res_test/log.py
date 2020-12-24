@@ -42,6 +42,7 @@ class WRFile():
                 # excel
                 self.exl.InputWData(data)
                 self.exl.WriteOutLog()
+        self.exl.SortSheet()
     
                       
 
@@ -53,6 +54,7 @@ class Log(WRFile):
     
     # public
     def __init__(self, file):
+        file = fr'{file}'
         WRFile.__init__(self,file)
         
         self.log_file = tool.GetFileName(file)

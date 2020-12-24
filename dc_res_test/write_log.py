@@ -20,7 +20,7 @@ class WLog(object):
 
     def Writelist(self, i_list, split_char):
         for i, vol in enumerate(i_list):
-            self.w_f.write(vol)
+            self.w_f.write(str(vol))
             if not i == len(i_list)-1:
                 self.w_f.write(split_char)
         else:

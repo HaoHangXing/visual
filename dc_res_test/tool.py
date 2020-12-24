@@ -63,3 +63,9 @@ def FindTime(str, pattern):
 def GetFileName(file):
     list = os.path.split(file)
     return list[1]
+
+
+def ListConverStrToFloat(list):
+    for i, num in enumerate(list):
+        list[i] = float(list[i])
+    # return [float(x) for x in list]

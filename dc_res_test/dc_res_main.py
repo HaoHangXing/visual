@@ -19,15 +19,16 @@ class DcGetThread(threading.Thread):
 
 def DcGetMainFun():
 
-    while True:
-        log_file = input('请输入要处理的log：')
-        log.LogHandler(log_file)
+    if 1:
+        while True:
+            log_file = input('请输入要处理的log：')
+            log.LogHandler(log_file)
         
+    else:
 
-
-    #log.LogHandler('456.log')
-    #while True:
-    #    pass
+        log.LogHandler('hang5.log')
+        while True:
+            pass
 
 if __name__ == '__main__':
     print('hello')

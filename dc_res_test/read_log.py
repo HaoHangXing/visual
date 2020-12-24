@@ -67,6 +67,13 @@ class RLog(LogInfo):
             return self.data
         else:
             return False
+
+    def DataHandler(self):
+        tool.ListConverStrToFloat(self.data.cell_vol_list)
+        tool.ListConverStrToFloat(self.data.test_vol_list)
+        tool.ListConverStrToFloat(self.data.rad_temperature_list)
+        tool.ListConverStrToFloat(self.data.board_temperature_list)
+        tool.ListConverStrToFloat(self.data.test_current_list)
     '''
     private
     '''
@@ -119,5 +126,6 @@ class RLog(LogInfo):
 
             # 若果测试没有出现异常,应该有expect_test_cout次.
             if self.data.test_cout == self.expect_test_cout:
+                self.DataHandler()
                 self.__OneFinishFlag = True
   
