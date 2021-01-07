@@ -5,16 +5,16 @@ class DataInfo(object):
     dc_start_vol = 0       # 测试前电压
     dc_end_vol = 0  # 最后一次放电电压
     e_vol = 0       # 充电完成后测得电压
-    s_time_dict = {}
+    s_time_dict = {} 
     e_time_dict = {}
     cell_vol_list = []
     test_vol_list = []
     rad_temperature_list = []
     board_temperature_list = []
-    test_current_list = []
+    test_current_list = [] # 分别是电流、电压、电阻
     ch = 0
-    test_index = 0
-    test_cout = 0
+    test_index = 0 # 第几次测试
+    test_cout = 0  # 此通道第几次测试
 
     
 
@@ -27,14 +27,24 @@ class LogInfo(object):
     time_format_list = ('year', 'month', 'day', 'hour','min','sec') # 与time_format要对应
 
 
+    #s_begin_vol   = '[SUCCESS vol]'
+    #s_test_volt   = '[Volt]'
+    #s_rad_temperature = '[r_t]'
+    #s_board_temperature = '[p_t]'
+    #s_current = '[result]'
+    #s_end_vol = '[reach charge end vol]'
+
     s_begin_vol   = '[SUCCESS vol]'
-    s_test_volt   = '[Volt]'
-    s_rad_temperature = '[r_t]'
+    s_test_volt   = '[Volt] '
+    s_rad_temperature = '[r_t] '
     s_board_temperature = '[p_t]'
     s_current = '[result]'
     s_end_vol = '[reach charge end vol]'
 
-    expect_test_cout = 360 # 期望的电压总测量次数
+    except_cell_vol_num1 = 60
+    except_cell_vol_num2 = 80
+    except_test_vol_num  = 160
+    expect_test_cout = except_cell_vol_num1+except_cell_vol_num2+except_test_vol_num # 期望的电压总测量次数
 
     get_list = [s_begin_vol, s_test_volt, s_rad_temperature, s_board_temperature, s_current, s_end_vol] 
 
@@ -52,6 +62,7 @@ class RLog(LogInfo):
     def ReadOneLine(self):
         line = self.r_f.readline()
         if not line:
+            print("line end")
             return False # 读到尾
 
         for info in self.get_list:
@@ -100,9 +111,10 @@ class RLog(LogInfo):
             self.data.test_cout = int(data_list[2])
             if not self.data.test_cout == self.expect_test_cout:
                 return False
-            self.data.cell_vol_list = data_list[3:3+200+1]
-            self.data.test_vol_list = data_list[3+200+1:-1]
-            self.data.dc_end_vol = float(data_list[3+200])
+            offset = self.except_cell_vol_num1 + self.except_cell_vol_num2 #  开关电压偏移位置
+            self.data.cell_vol_list = data_list[3:3+offset+1]
+            self.data.test_vol_list = data_list[3+offset+1:-1]
+            self.data.dc_end_vol = float(data_list[3+offset])
 
         elif self.s_rad_temperature == info and self.data.test_cout == self.expect_test_cout:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
@@ -123,9 +135,11 @@ class RLog(LogInfo):
             time_list = tool.FindTime(line, self.time_format)
             self.data.e_time_dict = dict(zip(self.time_format_list, time_list))
             self.data.e_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
-
             # 若果测试没有出现异常,应该有expect_test_cout次.
             if self.data.test_cout == self.expect_test_cout:
                 self.DataHandler()
                 self.__OneFinishFlag = True
+
+
+            
   

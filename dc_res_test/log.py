@@ -42,6 +42,9 @@ class WRFile():
                 # excel
                 self.exl.InputWData(data)
                 self.exl.WriteOutLog()
+        
+    def OrganizeData(self):
+        self.exl.WsMainOrganizeData()
         self.exl.SortSheet()
     
                       
@@ -73,6 +76,8 @@ def LogHandler(file):
         
     log = Log(file)
     print("====== begin ExtarcData ======")
-    log.ExtarctLog()
+    log.ExtarctLog() 
+    log.OrganizeData()  
     log.WREnd()
+    
     print('====== End ExtarcData ======')
