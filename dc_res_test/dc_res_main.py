@@ -26,7 +26,7 @@ def DcGetMainFun():
         
     else:
 
-        log.LogHandler('hang5.log')
+        log.LogHandler('test.log')
         while True:
             pass
 

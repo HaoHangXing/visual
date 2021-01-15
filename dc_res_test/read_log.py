@@ -1,7 +1,13 @@
 import tool 
+# 影响数据统计的相关变量
+class VarDataInfo(object):
+    except_cell_vol_num1 = 60
+    except_cell_vol_num2 = 80
+    except_test_vol_num  = 160
+    expect_test_cout = except_cell_vol_num1+except_cell_vol_num2+except_test_vol_num # 期望的电压总测量次数
 
 # 配置输出的日志格式
-class DataInfo(object):
+class DataInfo(VarDataInfo):
     dc_start_vol = 0       # 测试前电压
     dc_end_vol = 0  # 最后一次放电电压
     e_vol = 0       # 充电完成后测得电压
@@ -23,16 +29,8 @@ class LogInfo(object):
     #time_format = r'(\[\d+:\d+:\d+\])' # 例：[02:23:45]
     #time_format_list = ('hour','min','sec') # 与time_format要对应
 
-    time_format = r'(\[\d+\/\d+\/\d+ \d+:\d+:\d+\])' # 例：[02:23:45] [2020/12/22 20:25:36]
+    time_format = r'(\[\d+\/\d+\/\d+ \d+:\d+:\d+\])' # 例：[2020/12/22 20:25:36]
     time_format_list = ('year', 'month', 'day', 'hour','min','sec') # 与time_format要对应
-
-
-    #s_begin_vol   = '[SUCCESS vol]'
-    #s_test_volt   = '[Volt]'
-    #s_rad_temperature = '[r_t]'
-    #s_board_temperature = '[p_t]'
-    #s_current = '[result]'
-    #s_end_vol = '[reach charge end vol]'
 
     s_begin_vol   = '[SUCCESS vol]'
     s_test_volt   = '[Volt] '
@@ -40,16 +38,10 @@ class LogInfo(object):
     s_board_temperature = '[p_t]'
     s_current = '[result]'
     s_end_vol = '[reach charge end vol]'
-
-    except_cell_vol_num1 = 60
-    except_cell_vol_num2 = 80
-    except_test_vol_num  = 160
-    expect_test_cout = except_cell_vol_num1+except_cell_vol_num2+except_test_vol_num # 期望的电压总测量次数
-
     get_list = [s_begin_vol, s_test_volt, s_rad_temperature, s_board_temperature, s_current, s_end_vol] 
 
 
-class RLog(LogInfo):
+class RLog(LogInfo, VarDataInfo):
     __OneFinishFlag = False
 
     def __init__(self, file):
@@ -131,7 +123,7 @@ class RLog(LogInfo):
             data_list = data_str.split(',')
             self.data.test_current_list = data_list[3:-1]
 
-        elif self.s_end_vol == info and self.data.test_cout == self.expect_test_cout:
+        # elif self.s_end_vol == info and self.data.test_cout == self.expect_test_cout:
             time_list = tool.FindTime(line, self.time_format)
             self.data.e_time_dict = dict(zip(self.time_format_list, time_list))
             self.data.e_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])

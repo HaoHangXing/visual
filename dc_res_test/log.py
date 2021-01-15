@@ -1,7 +1,7 @@
 import tool 
 import read_log
 import write_log
-import excel
+from excel_log import main_excel_log
 
 
 
@@ -20,7 +20,7 @@ class WRFile():
         self.w_log = write_log.WLog(file)
 
         # excel
-        self.exl = excel.ELog(f'{file}.xlsx')
+        self.exl = main_excel_log.ELog(f'{file}.xlsx')
 
     def WREnd(self):
         self.r_log.close()
