@@ -1,16 +1,17 @@
 from excel import base as excel_base
 
-# Main sheet 从总表中获取想要的数据
+
 class WsMainData():
     def __init__(self, ch):
         self.ch = ch
-        self.num = 2
+        self.num = 1
 
     def __add__(self, other):
         c_add = WsMainData()
         c_add.s_y = self.s_y + self.num + other.num
         return c_add
 
+# Main sheet 从total表中获取想要的数据
 class WsMain(excel_base.SheetInfo):
     def __init__(self, wb, name, index):
         ws = wb.create_sheet(name)
@@ -34,8 +35,10 @@ class WsMain(excel_base.SheetInfo):
         # 写坐标
         self.w_x = 1
         self.w_y = 1
-        # 
-        end_empty_line = 3
+        # 数据前后的空行，用于写标题和结尾
+        self.title_empty_line = 1 
+        self.end_empty_line = 3 
+        
         while True:
             self.w_y = 1
             data = self.r_ws.cell(row=r_y, column=r_x)
@@ -45,15 +48,15 @@ class WsMain(excel_base.SheetInfo):
                 break
  
             for i, ch_data in enumerate(c_list):
-                self.w_y += ch_data.num+end_empty_line
+                self.w_y += ch_data.num + self.title_empty_line + self.end_empty_line
                 if ch_data.ch == ch:
                     ch_data.num += 1
-                    self.w_y -= end_empty_line
+                    self.w_y -= self.end_empty_line
                     break;
                 elif ch_data.ch > ch:
                     ch_data = WsMainData(ch)
                     c_list.insert(i, ch_data)
-                    self.w_y -= ch_data.num + end_empty_line
+                    self.w_y -= ch_data.num + self.title_empty_line + self.end_empty_line
                     self.AppendTitleLine(cell_vol_num, test_vol_num)
                     self.AppendEndLine(ch)
                     break
@@ -67,7 +70,7 @@ class WsMain(excel_base.SheetInfo):
             cell_vol = excel_base.GetSheetLineData(self.r_ws, r_x+cell_vol_offset, r_y, r_x+cell_vol_offset+cell_vol_num, r_y) 
             test_vol = excel_base.GetSheetLineData(self.r_ws, r_x+test_vol_offset, r_y+1, r_x+test_vol_offset+test_vol_num, r_y+1)
 
-            tmp_list = [ch, ch_data.num-1]
+            tmp_list = [ch, ch_data.num]
             tmp_list += cell_vol
             tmp_list.append('')
             tmp_list += test_vol
@@ -91,7 +94,7 @@ class WsMain(excel_base.SheetInfo):
         tmp_list += [x for x in range(s_num+1, s_num+1+test_vol_num+1)]
         self.InsertRows(self.w_y, 1)
         self.WriteRowList(self.w_x, self.w_y, tmp_list)
-        self.w_y += 1
+        self.w_y += self.title_empty_line
 
     def AppendEndLine(self, ch):
         #res_list = [1.246,1.111,3.31,1.913,1.882,1.754,1.243,1.487,1.318,1.428,
@@ -110,7 +113,7 @@ class WsMain(excel_base.SheetInfo):
         tmp_list.append(res_list[ch])
         
 
-        self.InsertRows(self.w_y, 3)
+        self.InsertRows(self.w_y, self.end_empty_line)
         self.WriteRowList(self.w_x, self.w_y, tmp_list)
 
     def Inputdata(self,data):
