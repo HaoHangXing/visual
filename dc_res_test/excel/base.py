@@ -5,6 +5,12 @@ from openpyxl.styles import Font, colors, Alignment
 class CellAlignForamt(object):
     align_center = Alignment(horizontal='center', vertical='center')
 
+class CellLocate(object):
+    x = 0
+    y = 0
+    
+
+
 class SheetInfo(CellAlignForamt):
     ws = ''
     name = ''
@@ -25,12 +31,21 @@ class SheetInfo(CellAlignForamt):
 
     def InsertRows(self, row, num):
         for i in range(0, num):
-            self.ws.insert_rows(self.w_y+i)
+            self.ws.insert_rows(row+i)
+
+    def InsertCols(self, col, num):
+        for i in range(0, num):
+            self.ws.insert_cols(col+i)
 
     def WriteRowList(self, colume, row, list):
         for i, var in enumerate(list):
             self.ws.cell(row, colume+i, var)
             self.ws.cell(row, colume+i).alignment = self.align_center
+
+    def WriteColsList(self, colume, row, list):
+        for i, var in enumerate(list):
+            self.ws.cell(row+i, colume, var)
+            self.ws.cell(row+i, colume).alignment = self.align_center
             
 
     def SetRangeAlignment(self, s_col, s_row, e_col, e_row, alignment):

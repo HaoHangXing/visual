@@ -4,6 +4,7 @@ from excel import chart as excel_chart
 from excel_log import total_sheet
 from excel_log import channel_sheet
 from excel_log import main_sheet
+from excel_log import resist_sheet
 
 class SheetNameIndex(object):
     '''
@@ -11,7 +12,8 @@ class SheetNameIndex(object):
     '''
     t_main = 'main'
     t_total = 'total'
-    sheet_title = [t_main, t_total]
+    t_resist = 'resist'
+    sheet_title = [t_main, t_resist, t_total]
 
 
 class ELog(SheetNameIndex):
@@ -57,6 +59,11 @@ class ELog(SheetNameIndex):
         self.main_ws.SetReadSheet(self.total_ws.ws)
         self.main_ws.Inputdata(self.data) # 为了处理部分易变的数据
         self.main_ws.MainHandler()
+
+        self.resist_ws = resist_sheet.WsResist(self.wb, self.t_resist, self.sheet_title.index(self.t_resist))
+        self.resist_ws.SetReadSheet(self.total_ws.ws)
+        self.resist_ws.Inputdata(self.data)
+        self.resist_ws.MainHandler()
 
 
     def SortSheet(self):
