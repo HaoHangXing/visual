@@ -21,7 +21,7 @@ class ELog(SheetNameIndex):
         self.wb = openpyxl.Workbook()
         print("set write to  :"+ file)
         self.save = file
-
+        self.data = None
         self.ws_dict = {} # 存储通道sheet类
         
         # 创建一个总表
@@ -55,15 +55,18 @@ class ELog(SheetNameIndex):
 
     
     def WsMainOrganizeData(self):
+        
         self.main_ws = main_sheet.WsMain(self.wb, self.t_main, self.sheet_title.index(self.t_main))
         self.main_ws.SetReadSheet(self.total_ws.ws)
-        self.main_ws.Inputdata(self.data) # 为了处理部分易变的数据
-        self.main_ws.MainHandler()
+        if self.data:
+            self.main_ws.Inputdata(self.data) # 为了处理部分易变的数据
+            self.main_ws.MainHandler()
 
         self.resist_ws = resist_sheet.WsResist(self.wb, self.t_resist, self.sheet_title.index(self.t_resist))
         self.resist_ws.SetReadSheet(self.total_ws.ws)
-        self.resist_ws.Inputdata(self.data)
-        self.resist_ws.MainHandler()
+        if self.data:
+            self.resist_ws.Inputdata(self.data)
+            self.resist_ws.MainHandler()
 
 
     def SortSheet(self):

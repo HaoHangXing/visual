@@ -36,7 +36,7 @@ class WsTotal(StrTitle, excel_base.SheetInfo, excel_base.CellAlignForamt):
        
     def WriteData(self, data):
         # self.ws_dict[self.total].s_x += 1
-        self.WriteOneLine(self.s_cell_vol,  data.ch,  data.cell_vol_list)
+        self.WriteOneLine(self.s_cell_vol,  data.ch,  data.cell_vol_list+data.test_vol_list)
         self.WriteOneLine(self.s_test_vol,  data.ch,  data.test_vol_list)
         self.WriteOneLine(self.s_rad_tem,   data.ch,  data.rad_temperature_list)
         self.WriteOneLine(self.s_board_tem, data.ch,  data.board_temperature_list)

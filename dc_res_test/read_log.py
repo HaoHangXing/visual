@@ -1,7 +1,7 @@
 import tool 
 # 影响数据统计的相关变量
 class VarDataInfo(object):
-    except_cell_vol_num1 = 60
+    except_cell_vol_num1 = 180
     except_cell_vol_num2 = 80
     except_test_vol_num  = 160
     expect_test_cout = except_cell_vol_num1+except_cell_vol_num2+except_test_vol_num # 期望的电压总测量次数
@@ -38,20 +38,26 @@ class LogInfo(object):
     s_board_temperature = '[p_t]'
     s_current = '[result]'
     s_end_vol = '[reach charge end vol]'
-    get_list = [s_begin_vol, s_test_volt, s_rad_temperature, s_board_temperature, s_current, s_end_vol] 
+    s_max_charge_vol = '[reach max charge time, end vol]'
+    get_list = [s_begin_vol, s_test_volt, s_rad_temperature, s_board_temperature, s_current, s_end_vol,s_max_charge_vol] 
 
 
 class RLog(LogInfo, VarDataInfo):
     __OneFinishFlag = False
-
+    __start_flag = False
+    data = None
+    line_num = 0
     def __init__(self, file):
-        self.r_f = open(file, 'r', encoding='utf-8')
+        #self.r_f = open(file, 'r', encoding='utf-8')
+        self.r_f = open(file, 'r')
 
     def close(self):
         self.r_f.close()
 
     # 读取一行
     def ReadOneLine(self):
+        self.line_num += 1
+        print("line_num:",self.line_num)
         line = self.r_f.readline()
         if not line:
             print("line end")
@@ -90,12 +96,13 @@ class RLog(LogInfo, VarDataInfo):
             # self.data = WLog(self.w_f)
             self.data = DataInfo()
             self.__OneFinishFlag = False
+            self.__start_flag = True
 
             time_list = tool.FindTime(line, self.time_format)
             self.data.s_time_dict = dict(zip(self.time_format_list, time_list))
             self.data.dc_start_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
 
-        elif self.s_test_volt == info:
+        elif self.s_test_volt == info and self.__start_flag == True:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
             self.data.ch = int(data_list[0])
@@ -108,25 +115,26 @@ class RLog(LogInfo, VarDataInfo):
             self.data.test_vol_list = data_list[3+offset+1:-1]
             self.data.dc_end_vol = float(data_list[3+offset])
 
-        elif self.s_rad_temperature == info and self.data.test_cout == self.expect_test_cout:
+        elif self.s_rad_temperature == info and self.data.test_cout == self.expect_test_cout and self.__start_flag == True and self.data:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
             self.data.rad_temperature_list = data_list[3:-1]
 
-        elif self.s_board_temperature == info and self.data.test_cout == self.expect_test_cout:
+        elif self.s_board_temperature == info and self.data.test_cout == self.expect_test_cout and self.__start_flag == True and self.data:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
             self.data.board_temperature_list = data_list[3:-1]
 
-        elif self.s_current == info and self.data.test_cout == self.expect_test_cout:
+        elif self.s_current == info and self.data.test_cout == self.expect_test_cout and self.__start_flag == True and self.data:
             data_str =(tool.FindPatternStr(line, '\d+\,.*\,$'))[0]
             data_list = data_str.split(',')
             self.data.test_current_list = data_list[3:-1]
 
-        # elif self.s_end_vol == info and self.data.test_cout == self.expect_test_cout:
+        #elif (self.s_end_vol == info or self.s_max_charge_vol == info )and self.data.test_cout == self.expect_test_cout and self.__start_flag == True  and self.data:
             time_list = tool.FindTime(line, self.time_format)
             self.data.e_time_dict = dict(zip(self.time_format_list, time_list))
             self.data.e_vol = float((tool.FindPatternStr(line, '\d+\.\d+'))[0])
+            self.__start_flag == False
             # 若果测试没有出现异常,应该有expect_test_cout次.
             if self.data.test_cout == self.expect_test_cout:
                 self.DataHandler()
