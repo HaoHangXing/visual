@@ -5,6 +5,7 @@ from excel_log import total_sheet
 from excel_log import channel_sheet
 from excel_log import main_sheet
 from excel_log import resist_sheet
+from excel_log import vol_deviation
 
 class SheetNameIndex(object):
     '''
@@ -13,7 +14,8 @@ class SheetNameIndex(object):
     t_main = 'main'
     t_total = 'total'
     t_resist = 'resist'
-    sheet_title = [t_main, t_resist, t_total]
+    t_vol_deviation = 'vol_deviation'
+    sheet_title = [t_main, t_vol_deviation, t_resist, t_total]
 
 
 class ELog(SheetNameIndex):
@@ -61,6 +63,12 @@ class ELog(SheetNameIndex):
         if self.data:
             self.main_ws.Inputdata(self.data) # 为了处理部分易变的数据
             self.main_ws.MainHandler()
+
+        self.vol_devi_ws = vol_deviation.WsVolDevi(self.wb, self.t_vol_deviation, self.sheet_title.index(self.t_main))
+        self.main_ws.SetReadSheet(self.total_ws.ws)
+        if self.data:
+            self.vol_devi_ws.Inputdata(self.data) 
+            #self.vol_devi_ws.MainHandler()
 
         self.resist_ws = resist_sheet.WsResist(self.wb, self.t_resist, self.sheet_title.index(self.t_resist))
         self.resist_ws.SetReadSheet(self.total_ws.ws)

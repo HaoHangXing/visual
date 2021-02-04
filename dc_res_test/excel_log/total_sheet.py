@@ -16,6 +16,23 @@ class StrTitle(object):
     s_title = u'参数'
     s_ch = u'通道'
 
+
+ # 如果更改了total的数据排列或写入方式，记得更改这里
+class TotalInfo(StrTitle):
+    # 提供给其他sheet读取数据的起始坐标
+    r_x = 2
+    r_y = 2 
+    line_info=[]
+
+    def __init__(self):
+        self.cell_vol_line = self.s_cell_vol
+        self.test_vol_line = self.s_test_vol
+        self.rad_tem_line = self.s_rad_tem
+        self.board_tem_line = self.s_board_tem
+        self.current_line = self.s_current
+        self.line_info = [self.cell_vol_line, self.test_vol_line, self.rad_tem_line, self.board_tem_line, self.current_line]
+        
+
 # 记录total数据的sheet
 class WsTotal(StrTitle, excel_base.SheetInfo, excel_base.CellAlignForamt):
     w_line = 0 # 此sheet采用一行一行写入数据
@@ -35,7 +52,6 @@ class WsTotal(StrTitle, excel_base.SheetInfo, excel_base.CellAlignForamt):
 
        
     def WriteData(self, data):
-        # self.ws_dict[self.total].s_x += 1
         self.WriteOneLine(self.s_cell_vol,  data.ch,  data.cell_vol_list+data.test_vol_list)
         self.WriteOneLine(self.s_test_vol,  data.ch,  data.test_vol_list)
         self.WriteOneLine(self.s_rad_tem,   data.ch,  data.rad_temperature_list)

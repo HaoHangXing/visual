@@ -1,5 +1,6 @@
 from excel import base as excel_base
 from openpyxl.utils import get_column_letter
+from excel_log.total_sheet import TotalInfo
 
 class WsResistData():
     def __init__(self, ch):
@@ -23,15 +24,13 @@ class WsResist(excel_base.SheetInfo):
         self.r_ws = ws
 
     def MainHandler(self):
-        r_x = 2
-        r_y = 2
+        read_info = TotalInfo()
+        r_x = read_info.r_x
+        r_y = read_info.r_y
+        cell_vol_line = read_info.line_info.index(read_info.cell_vol_line)
+        test_vol_line = read_info.line_info.index(read_info.test_vol_line)
+        current_line = read_info.line_info.index(read_info.current_line)
         c_list:channel_class = []
-        ## 提取最后5个通道电压
-        #cell_vol_offset = self.data.except_cell_vol_num1+self.data.except_cell_vol_num2 - 3 # '-3'是排除开头的数据
-        #cell_vol_num = 5-1
-        ## 提取160个开关电压
-        #test_vol_offset = 1
-        #test_vol_num = self.data.except_test_vol_num - 1
         
         self.title_line = 2  # 标题占2行
         self.channel_row = 4 # 一个通道提供4列数据
@@ -68,14 +67,14 @@ class WsResist(excel_base.SheetInfo):
 
             # 填写数据
             if 1:
-                cell = self.r_ws.cell(row=r_y+1, column=r_x+1)
+                cell = self.r_ws.cell(row=r_y+test_vol_line, column=r_x+1)
                 vol = cell.value
             else:
-                cell1 = self.r_ws.cell(row=r_y, column=r_x+1+self.data.except_cell_vol_num1+self.data.except_cell_vol_num2)
-                cell2 = self.r_ws.cell(row=r_y+1, column=r_x+1)
+                cell1 = self.r_ws.cell(row=r_y+cell_vol_line, column=r_x+1+self.data.except_cell_vol_num1+self.data.except_cell_vol_num2)
+                cell2 = self.r_ws.cell(row=r_y+test_vol_line, column=r_x+1)
                 vol = cell2.value - cell1.value
 
-            cell = self.r_ws.cell(row=r_y+4, column=r_x+1)
+            cell = self.r_ws.cell(row=r_y+current_line, column=r_x+1)
             current = cell.value
             resist = "=%s%d/%s%d/220*1000" % (get_column_letter(self.w_x), self.w_y, get_column_letter(self.w_x+1), self.w_y) 
             #resist = "=%s%d/%s%d/154.5*1000" % (get_column_letter(self.w_x), self.w_y, get_column_letter(self.w_x+1), self.w_y) 
@@ -83,7 +82,7 @@ class WsResist(excel_base.SheetInfo):
             data_list = [vol, current, resist]
             self.WriteRowList(self.w_x, self.w_y, data_list)
 
-            r_y += 5
+            r_y += len(read_info.line_info)
         # 填写左侧标题栏
         self.AppendLeftTitle()
         

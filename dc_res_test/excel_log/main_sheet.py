@@ -1,5 +1,5 @@
 from excel import base as excel_base
-
+from excel_log.total_sheet import TotalInfo
 
 class WsMainData():
     def __init__(self, ch):
@@ -21,16 +21,18 @@ class WsMain(excel_base.SheetInfo):
         self.r_ws = ws
 
     def MainHandler(self):
-        r_x = 2
-        r_y = 2
+        read_info = TotalInfo()
+        r_x = read_info.r_x
+        r_y = read_info.r_y
         c_list = []
         # 提取最后5个通道电压
-        cell_vol_offset = self.data.except_cell_vol_num1+self.data.except_cell_vol_num2 - 3 # '-3'是排除开头的数据
+        cell_vol_offset = self.data.except_cell_vol_num1+self.data.except_cell_vol_num2-3 # '-3'是排除开头的数据
         cell_vol_num = 5-1
+        cell_vol_line = read_info.line_info.index(read_info.cell_vol_line)
         # 提取160个开关电压
         test_vol_offset = 1
         test_vol_num = self.data.except_test_vol_num - 1
-
+        test_vol_line = read_info.line_info.index(read_info.test_vol_line)
 
         # 写坐标
         self.w_x = 1
@@ -67,8 +69,8 @@ class WsMain(excel_base.SheetInfo):
                 self.AppendTitleLine(cell_vol_num, test_vol_num)
                 self.AppendEndLine(ch)
 
-            cell_vol = excel_base.GetSheetLineData(self.r_ws, r_x+cell_vol_offset, r_y, r_x+cell_vol_offset+cell_vol_num, r_y) 
-            test_vol = excel_base.GetSheetLineData(self.r_ws, r_x+test_vol_offset, r_y+1, r_x+test_vol_offset+test_vol_num, r_y+1)
+            cell_vol = excel_base.GetSheetLineData(self.r_ws, r_x+cell_vol_offset, r_y+cell_vol_line, r_x+cell_vol_offset+cell_vol_num, r_y+cell_vol_line) 
+            test_vol = excel_base.GetSheetLineData(self.r_ws, r_x+test_vol_offset, r_y+test_vol_line, r_x+test_vol_offset+test_vol_num, r_y+test_vol_line)
 
             tmp_list = [ch, ch_data.num]
             tmp_list += cell_vol
@@ -80,7 +82,7 @@ class WsMain(excel_base.SheetInfo):
             for i, value in enumerate(tmp_list):
                 self.ws.cell(column=self.w_x+i, row=self.w_y, value =value)
 
-            r_y += 5
+            r_y += len(read_info.line_info)
             #for c in c_list:
             #    print("ch:%d num:%d"%(c.ch, c.num))
             #print("data ch:%d num:%d self.w_y:%d"%(ch_data.ch, ch_data.num, self.w_y))
