@@ -65,10 +65,10 @@ class ELog(SheetNameIndex):
             self.main_ws.MainHandler()
 
         self.vol_devi_ws = vol_deviation.WsVolDevi(self.wb, self.t_vol_deviation, self.sheet_title.index(self.t_main))
-        self.main_ws.SetReadSheet(self.total_ws.ws)
+        self.vol_devi_ws.SetReadSheet(self.total_ws.ws)
         if self.data:
             self.vol_devi_ws.Inputdata(self.data) 
-            #self.vol_devi_ws.MainHandler()
+            self.vol_devi_ws.MainHandler()
 
         self.resist_ws = resist_sheet.WsResist(self.wb, self.t_resist, self.sheet_title.index(self.t_resist))
         self.resist_ws.SetReadSheet(self.total_ws.ws)
